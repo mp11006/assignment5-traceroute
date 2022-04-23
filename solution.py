@@ -57,7 +57,7 @@ def build_packet():
         header = struct.pack("bbHHh", ICMP_ECHO_REQUEST,0,Checksum,ID,1)
         data = struct.pack('d', time.time())
 
-        CheckSum = checksum(header + mydata)
+        CheckSum = checksum(header + data)
 
         if sys.platform == 'darwin':
                 CheckSum = htons(CheckSum) & 0xffff
