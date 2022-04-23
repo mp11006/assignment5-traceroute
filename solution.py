@@ -52,7 +52,7 @@ def build_packet():
     # So the function ending should look like this
         CheckSum = 0
 
-        header.struct.pack('test', ICMP_ECHO_REQUEST, 0, CheckSum, ID, 1)
+        header.struct.pack('bbHHh', ICMP_ECHO_REQUEST, 0, CheckSum, ID, 1)
         mydata = struct.pack('d', time.time())
 
         CheckSum = checksum(header + mydata)
@@ -63,7 +63,7 @@ def build_packet():
         else:
                 CheckSum = htons(CheckSum)
 
-        header = struct.pack("test", ICMP_ECHO_REQUEST, 0, CheckSum, ID, 1)
+        header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, CheckSum, ID, 1)
 
         packet = header + data
         return packet
@@ -80,6 +80,8 @@ def get_route(hostname):
             #Fill in start
             # Make a raw socket named mySocket
             #Fill in end
+            icmp = socket.getprotobyname("icmp")
+            mySocket.socket.socket(socket.AF_INET, socket.SOCK_DGRAM,icmp)
 
             mySocket.setsockopt(IPPROTO_IP, IP_TTL, struct.pack('I', ttl))
             mySocket.settimeout(TIMEOUT)
@@ -92,6 +94,7 @@ def get_route(hostname):
                 howLongInSelect = (time.time() - startedSelect)
                 if whatReady[0] == []: # Timeout
                     tracelist1.append("* * * Request timed out.")
+                    tracelist2.append("* * * Request timed out.")
                     #Fill in start
                     #You should add the list above to your all traces list
                     #Fill in end
@@ -100,6 +103,7 @@ def get_route(hostname):
                 timeLeft = timeLeft - howLongInSelect
                 if timeLeft <= 0:
                     tracelist1.append("* * * Request timed out.")
+                    tracelist2.append("* * * Request timed out.")
                     #Fill in start
                     #You should add the list above to your all traces list
                     #Fill in end
@@ -110,6 +114,8 @@ def get_route(hostname):
                 #Fill in start
                 #Fetch the icmp type from the IP packet
                 #Fill in end
+                icmpHeader = recvPacket[20:28]
+                request_type, code, checksum, packetID, sequence = struct.unpack("bbHHh", icmpHeader)
                 try: #try to fetch the hostname
                     #Fill in start
                     #Fill in end
