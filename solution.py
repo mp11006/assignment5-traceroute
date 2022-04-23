@@ -60,7 +60,7 @@ def build_packet():
         if sys.platform == 'darwin':
                 CheckSum = htons(CheckSum) & 0xffff
 
-        else
+        else:
                 CheckSum = htons(CheckSum)
 
         header = struct.pack("test", ICMP_ECHO_REQUEST, 0, CheckSum, ID, 1)
