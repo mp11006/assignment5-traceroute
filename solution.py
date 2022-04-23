@@ -50,9 +50,23 @@ def build_packet():
     #Fill in end
 
     # So the function ending should look like this
+        CheckSum = 0
 
-    packet = header + data
-    return packet
+        header.struct.pack('test', ICMP_ECHO_REQUEST, 0, CheckSum, ID, 1)
+        mydata = struct.pack('d', time.time())
+
+        CheckSum = checksum(header + mydata)
+
+        if sys.platform == 'darwin':
+                CheckSum = htons(CheckSum) & 0xffff
+
+        else
+                CheckSum = htons(CheckSum)
+
+        header = struct.pack("test", ICMP_ECHO_REQUEST, 0, CheckSum, ID, 1)
+
+        packet = header + data
+        return packet
 
 def get_route(hostname):
     timeLeft = TIMEOUT
