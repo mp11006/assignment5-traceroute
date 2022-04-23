@@ -80,8 +80,7 @@ def get_route(hostname):
             #Fill in start
             # Make a raw socket named mySocket
             #Fill in end
-            icmp = socket.getprotobyname("icmp")
-            mySocket.socket.socket(socket.AF_INET, socket.SOCK_DGRAM,icmp)
+            mySocket = socket(AF_INET, SOCK_RAW, getprotobyname("icmp"))
 
             mySocket.setsockopt(IPPROTO_IP, IP_TTL, struct.pack('I', ttl))
             mySocket.settimeout(TIMEOUT)
@@ -94,18 +93,18 @@ def get_route(hostname):
                 howLongInSelect = (time.time() - startedSelect)
                 if whatReady[0] == []: # Timeout
                     tracelist1.append("* * * Request timed out.")
-                    tracelist2.append("* * * Request timed out.")
                     #Fill in start
                     #You should add the list above to your all traces list
+                    tracelist2.append(tracelist1)
                     #Fill in end
                 recvPacket, addr = mySocket.recvfrom(1024)
                 timeReceived = time.time()
                 timeLeft = timeLeft - howLongInSelect
                 if timeLeft <= 0:
                     tracelist1.append("* * * Request timed out.")
-                    tracelist2.append("* * * Request timed out.")
                     #Fill in start
                     #You should add the list above to your all traces list
+                    tracelist2.append(tracelist1)
                     #Fill in end
             except timeout:
                 continue
@@ -115,12 +114,14 @@ def get_route(hostname):
                 #Fetch the icmp type from the IP packet
                 #Fill in end
                 icmpHeader = recvPacket[20:28]
-                request_type, code, checksum, packetID, sequence = struct.unpack("bbHHh", icmpHeader)
+                types, code, checksum, packetID, sequence = struct.unpack("bbHHh", icmpHeader)
                 try: #try to fetch the hostname
                     #Fill in start
+                    tracelist1.append(gethostbyaddr(str(addr[0]))[0])
                     #Fill in end
                 except herror:   #if the host does not provide a hostname
                     #Fill in start
+                    tracelist1.append("hostname does not run")
                     #Fill in end
 
                 if types == 11:
@@ -129,21 +130,32 @@ def get_route(hostname):
                     bytes])[0]
                     #Fill in start
                     #You should add your responses to your lists here
+                    timeSent = struct.unpack("d", recvPacket[28:28 + bytes])[0]
+                    tracelist1.insert(-1, str(int((timeReceived - t)*1000))+"ms")
+                    tracelist1.insert(-1, addr[0])
+                    tracelist2.append(tracelist1)
                     #Fill in end
                 elif types == 3:
                     bytes = struct.calcsize("d")
                     timeSent = struct.unpack("d", recvPacket[28:28 + bytes])[0]
                     #Fill in start
-                    #You should add your responses to your lists here 
+                    #You should add your responses to your lists here
+                    tracelist1.insert(-1, str(int((timeReceived - t)*1000))+"ms")
+                    tracelist1.insert(-1, addr[0])
+                    tracelist2.append(tracelist1)
                     #Fill in end
                 elif types == 0:
                     bytes = struct.calcsize("d")
                     timeSent = struct.unpack("d", recvPacket[28:28 + bytes])[0]
                     #Fill in start
+                    tracelist1.insert(-1, str(int((timeReceived - t)*1000))+"ms")
+                    tracelist1.insert(-1, addr[0])
+                    tracelist2.append(tracelist1)
                     #You should add your responses to your lists here and return your list if your destination IP is met
                     #Fill in end
                 else:
                     #Fill in start
+                    print('Eerror')
                     #If there is an exception/error to your if statements, you should append that to your list here
                     #Fill in end
                 break
